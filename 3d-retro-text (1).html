@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Retro Text Effect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            font-family: Arial, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .canvas-area {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #textCanvas {
+            background: transparent;
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="color"],
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #ffeb3b;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .range-value {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #d32f2f;
+        }
+
+        .download-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .download-options button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="canvas-area">
+            <canvas id="textCanvas" width="1200" height="600"></canvas>
+        </div>
+
+        <div class="sidebar">
+            <h2>Settings</h2>
+
+            <div class="section">
+                <label for="textInput">Text</label>
+                <input 
+                    type="text" 
+                    id="textInput" 
+                    placeholder="Enter your text..."
+                    value="WEIRD"
+                    maxlength="15"
+                >
+            </div>
+
+            <div class="section">
+                <label for="fontSize">Font Size: <span class="range-value" id="fontSizeValue">150</span>px</label>
+                <input 
+                    type="range" 
+                    id="fontSize" 
+                    min="50" 
+                    max="300" 
+                    value="150"
+                >
+
+                <label for="depth3D">3D Depth: <span class="range-value" id="depthValue">16</span></label>
+                <input 
+                    type="range" 
+                    id="depth3D" 
+                    min="5" 
+                    max="30" 
+                    value="16"
+                >
+
+                <label for="depthAngle">3D Depth Angle: <span class="range-value" id="depthAngleValue">45</span>°</label>
+                <input 
+                    type="range" 
+                    id="depthAngle" 
+                    min="0" 
+                    max="360" 
+                    value="45"
+                >
+
+                <label for="letterSpacing">Letter Spacing: <span class="range-value" id="spacingValue">10</span>px</label>
+                <input 
+                    type="range" 
+                    id="letterSpacing" 
+                    min="0" 
+                    max="50" 
+                    value="10"
+                >
+            </div>
+
+            <div class="section">
+                <label for="rotateX">Rotate X: <span class="range-value" id="rotateXValue">15</span>°</label>
+                <input 
+                    type="range" 
+                    id="rotateX" 
+                    min="-45" 
+                    max="45" 
+                    value="15"
+                >
+
+                <label for="rotateY">Rotate Y: <span class="range-value" id="rotateYValue">-10</span>°</label>
+                <input 
+                    type="range" 
+                    id="rotateY" 
+                    min="-45" 
+                    max="45" 
+                    value="-10"
+                >
+            </div>
+
+            <div class="section">
+                <label for="topColor">Top Color</label>
+                <input type="color" id="topColor" value="#ffeb3b">
+
+                <label for="bottomColor">Bottom Color</label>
+                <input type="color" id="bottomColor" value="#291b0a">
+
+                <label for="bgColor">Background Color</label>
+                <input type="color" id="bgColor" value="#001845">
+            </div>
+
+            <div class="section">
+                <label for="bgType">Background Type</label>
+                <select id="bgType">
+                    <option value="gradient">Gradient</option>
+                    <option value="solid">Solid Color</option>
+                    <option value="transparent">Transparent</option>
+                </select>
+            </div>
+
+            <div class="section">
+                <h3 style="margin-bottom: 15px;">Download</h3>
+                <div class="download-options">
+                    <button class="download-btn" onclick="downloadImage('png')">PNG</button>
+                    <button class="download-btn" onclick="downloadImage('jpg')">JPG</button>
+                    <button class="download-btn" onclick="downloadImage('webp')">WEBP</button>
+                </div>
+                
+                <label for="downloadSize">Download Size</label>
+                <select id="downloadSize">
+                    <option value="1">Original (1200x600)</option>
+                    <option value="2">2x (2400x1200)</option>
+                    <option value="3">3x (3600x1800)</option>
+                    <option value="4">4x (4800x2400)</option>
+                </select>
+
+                <button class="reset-btn" onclick="resetSettings()">Reset to Default</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('textCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Settings
+        let settings = {
+            text: 'WEIRD',
+            fontSize: 150,
+            depth: 16,
+            depthAngle: 45,
+            letterSpacing: 10,
+            rotateX: 15,
+            rotateY: -10,
+            topColor: '#ffeb3b',
+            bottomColor: '#291b0a',
+            bgColor: '#001845',
+            bgType: 'gradient'
+        };
+
+        // Color interpolation
+        function interpolateColor(color1, color2, factor) {
+            const c1 = hexToRgb(color1);
+            const c2 = hexToRgb(color2);
+            const r = Math.round(c1.r + (c2.r - c1.r) * factor);
+            const g = Math.round(c1.g + (c2.g - c1.g) * factor);
+            const b = Math.round(c1.b + (c2.b - c1.b) * factor);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        // Draw text with 3D effect
+        function drawText() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background
+            if (settings.bgType === 'gradient') {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#000428');
+                gradient.addColorStop(1, settings.bgColor);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (settings.bgType === 'solid') {
+                ctx.fillStyle = settings.bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Save context
+            ctx.save();
+
+            // Apply transforms for 3D effect
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            
+            // Simple perspective simulation
+            const scaleX = 1 + (settings.rotateY / 100);
+            const scaleY = 1 + (settings.rotateX / 100);
+            const skewX = settings.rotateY / 150;
+            const skewY = -settings.rotateX / 150;
+            
+            ctx.transform(scaleX, skewY, skewX, scaleY, 0, 0);
+
+            // Set font
+            ctx.font = `900 ${settings.fontSize}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.letterSpacing = `${settings.letterSpacing}px`;
+
+            // Calculate depth offset based on angle
+            const angleRad = (settings.depthAngle * Math.PI) / 180;
+            const depthX = Math.cos(angleRad);
+            const depthY = Math.sin(angleRad);
+
+            // Draw 3D layers (back to front)
+            for (let i = settings.depth; i >= 0; i--) {
+                const factor = i / settings.depth;
+                const color = interpolateColor(settings.bottomColor, settings.topColor, 1 - factor);
+                
+                ctx.fillStyle = color;
+                ctx.fillText(settings.text.toUpperCase(), i * depthX, i * depthY);
+            }
+
+            // Add shadow for final layer
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = settings.depth * depthX + 5;
+            ctx.shadowOffsetY = settings.depth * depthY + 5;
+
+            ctx.restore();
+        }
+
+        // Download function
+        function downloadImage(format) {
+            const scale = parseInt(document.getElementById('downloadSize').value);
+            const downloadCanvas = document.createElement('canvas');
+            const downloadCtx = downloadCanvas.getContext('2d');
+            
+            downloadCanvas.width = canvas.width * scale;
+            downloadCanvas.height = canvas.height * scale;
+            
+            // Redraw with scaling
+            const originalSettings = {...settings};
+            
+            // Save context
+            downloadCtx.save();
+            
+            // Scale everything
+            downloadCtx.scale(scale, scale);
+            
+            // Clear canvas - leave transparent (no background)
+            downloadCtx.clearRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+
+            // Apply transforms for 3D effect
+            downloadCtx.translate(canvas.width / 2, canvas.height / 2);
+            
+            const scaleX = 1 + (settings.rotateY / 100);
+            const scaleY = 1 + (settings.rotateX / 100);
+            const skewX = settings.rotateY / 150;
+            const skewY = -settings.rotateX / 150;
+            
+            downloadCtx.transform(scaleX, skewY, skewX, scaleY, 0, 0);
+
+            // Set font
+            downloadCtx.font = `900 ${settings.fontSize}px Arial, sans-serif`;
+            downloadCtx.textAlign = 'center';
+            downloadCtx.textBaseline = 'middle';
+            downloadCtx.letterSpacing = `${settings.letterSpacing}px`;
+
+            // Calculate depth offset based on angle
+            const angleRad = (settings.depthAngle * Math.PI) / 180;
+            const depthX = Math.cos(angleRad);
+            const depthY = Math.sin(angleRad);
+
+            // Draw 3D layers
+            for (let i = settings.depth; i >= 0; i--) {
+                const factor = i / settings.depth;
+                const color = interpolateColor(settings.bottomColor, settings.topColor, 1 - factor);
+                
+                downloadCtx.fillStyle = color;
+                downloadCtx.fillText(settings.text.toUpperCase(), i * depthX, i * depthY);
+            }
+
+            // Add shadow
+            downloadCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            downloadCtx.shadowBlur = 20;
+            downloadCtx.shadowOffsetX = settings.depth * depthX + 5;
+            downloadCtx.shadowOffsetY = settings.depth * depthY + 5;
+
+            downloadCtx.restore();
+            
+            // Convert to data URL and download
+            // Note: JPG doesn't support transparency, so it will have a white background
+            const mimeType = format === 'jpg' ? 'image/jpeg' : `image/${format}`;
+            const quality = format === 'jpg' ? 0.95 : 1.0;
+            const dataURL = downloadCanvas.toDataURL(mimeType, quality);
+            
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = `3d-text-${settings.text.toLowerCase()}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Reset settings
+        function resetSettings() {
+            document.getElementById('textInput').value = 'WEIRD';
+            document.getElementById('fontSize').value = 150;
+            document.getElementById('depth3D').value = 16;
+            document.getElementById('depthAngle').value = 45;
+            document.getElementById('letterSpacing').value = 10;
+            document.getElementById('rotateX').value = 15;
+            document.getElementById('rotateY').value = -10;
+            document.getElementById('topColor').value = '#ffeb3b';
+            document.getElementById('bottomColor').value = '#291b0a';
+            document.getElementById('bgColor').value = '#001845';
+            document.getElementById('bgType').value = 'gradient';
+            
+            updateSettings();
+        }
+
+        // Update settings and redraw
+        function updateSettings() {
+            settings.text = document.getElementById('textInput').value || 'WEIRD';
+            settings.fontSize = parseInt(document.getElementById('fontSize').value);
+            settings.depth = parseInt(document.getElementById('depth3D').value);
+            settings.depthAngle = parseInt(document.getElementById('depthAngle').value);
+            settings.letterSpacing = parseInt(document.getElementById('letterSpacing').value);
+            settings.rotateX = parseInt(document.getElementById('rotateX').value);
+            settings.rotateY = parseInt(document.getElementById('rotateY').value);
+            settings.topColor = document.getElementById('topColor').value;
+            settings.bottomColor = document.getElementById('bottomColor').value;
+            settings.bgColor = document.getElementById('bgColor').value;
+            settings.bgType = document.getElementById('bgType').value;
+
+            // Update range value displays
+            document.getElementById('fontSizeValue').textContent = settings.fontSize;
+            document.getElementById('depthValue').textContent = settings.depth;
+            document.getElementById('depthAngleValue').textContent = settings.depthAngle;
+            document.getElementById('spacingValue').textContent = settings.letterSpacing;
+            document.getElementById('rotateXValue').textContent = settings.rotateX;
+            document.getElementById('rotateYValue').textContent = settings.rotateY;
+
+            drawText();
+        }
+
+        // Event listeners
+        document.getElementById('textInput').addEventListener('input', updateSettings);
+        document.getElementById('fontSize').addEventListener('input', updateSettings);
+        document.getElementById('depth3D').addEventListener('input', updateSettings);
+        document.getElementById('depthAngle').addEventListener('input', updateSettings);
+        document.getElementById('letterSpacing').addEventListener('input', updateSettings);
+        document.getElementById('rotateX').addEventListener('input', updateSettings);
+        document.getElementById('rotateY').addEventListener('input', updateSettings);
+        document.getElementById('topColor').addEventListener('input', updateSettings);
+        document.getElementById('bottomColor').addEventListener('input', updateSettings);
+        document.getElementById('bgColor').addEventListener('input', updateSettings);
+        document.getElementById('bgType').addEventListener('change', updateSettings);
+
+        // Initial draw
+        drawText();
+    </script>
+</body>
+</html>
